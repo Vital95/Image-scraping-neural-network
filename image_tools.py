@@ -9,6 +9,8 @@ import time
 import operator
 import logging
 from scipy import misc
+from os.path import basename
+import operator
 
 #todo review this part
 imglist = list()
@@ -66,41 +68,44 @@ class ImageCustom:
             #idk, but set color
             self.setGray(False)
 
+#get difference in 2 lists
+def diff(first, second):
+        second = set(second)
+        return [item for item in first if item not in second]
+
 #to do make good rename
 #rename all images in dir
-def MaskRename(target_path, mask, extensionList = [".jpg",".png"]):
-    files = os.listdir(target_path)
+def MaskRename(target_path, mask):
+    namesOfFiles = os.listdir(target_path)
     i = 1
-    listOfLists = list()
-    for ext in extensionList:
-        listOfLists = listOfLists + filter(lambda k: ext in k, files)
-    newList = list()
-    #get list with file_names and their extensions
-    for file in listOfLists:
-        filename, file_extension = os.path.splitext(file)
-        newList.append(filename,file_extension)
-
-    maskList = list()
-    for q in range(1, len(newList),1):
-        maskList.append(mask + "_" + str(q))
+    l = list()
+    #removing extension
+    for item in namesOfFiles:
+        l.append(os.path.splitext(item)[0])
     
-    #check if names are not intersecting
-    intersect = list(set(filename in newList) & set(maskList))
+    futureNamesOfFiles = list()
+    #applying new mask 
+    for q in range(0, len(l),1):
+        futureNamesOfFiles.append(mask + "_" + str(q))  
 
-    if(len(intersect) == 0):
-        for filename, file_extension in newList:
-            os.rename(os.path.join(target_path, filename + file_extension), os.path.join(target_path, mask + "_" + str(i)+file_extension))
-            i = i+1
-    else:
-        
-        
-        filteredFileList = filter(lambda k: intersect in filename,filename in newList)
-        
-        
-        filteredMaskList = filter(lambda k: intersect in filename,filename in newList)
-        for filename, file_extension in filteredList:
-            os.rename(os.path.join(target_path, file), os.path.join(target_path, mask + "__" + str(i)+'.jpg'))
-            i = i+1
+    listOfDiff = diff(l, futureNamesOfFiles)
+    
+    fileAfterRename = [ x for x in namesOfFiles if x.startswith(tuple(listOfDiff)) ]
+
+    iterator = 0
+    shift = 1
+    for newItem in fileAfterRename:
+        filename, file_extension = os.path.splitext(newItem)
+        old_file = os.path.join(target_path, newItem)
+        new_file = os.path.join(target_path, futureNamesOfFiles[iterator] + file_extension)
+        try:
+            os.rename(old_file, new_file)
+            iterator = iterator + 1
+        except Exception:
+            new_file = os.path.join(target_path, futureNamesOfFiles[iterator + 1] + file_extension)
+            os.rename(old_file, new_file)
+            iterator = iterator + 2
+            pass
 
 # fixed, works good, move images by width and height, plus clear unreadable junk
 def moveImagesToFolderByResolution(sourceFolder ,targetFolder, width, height):

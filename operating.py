@@ -1,7 +1,15 @@
 import os
 from multiprocessing import Pool
 import time
+import image_tools
 
+targetPath = 'D:\\Img_base\\TMP_rename_test\\train\\train_folder'
+
+#strange but it shuffle images somehow
+image_tools.MaskRename(targetPath,'Ahegao')
+
+#region remove same images tests
+'''
 sourcePath = 'D:\\Img_base\\Scraping\\big part faces'
 targetPath = 'D:\\Img_base\\Scraping\\Junk'
 
@@ -22,3 +30,5 @@ if __name__ == '__main__':
 string =   str(time.time() - start_time)
 
 print(string)
+
+'''
